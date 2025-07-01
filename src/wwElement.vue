@@ -145,7 +145,103 @@ export default {
 }
 </script>
 
-<style>
-/* Import global shadcn/ui styles */
-@import './globals.css';
+<style scoped>
+/* Variables CSS Shadcn/UI */
+:root {
+  --primary: hsl(222.2, 47.4%, 11.2%);
+  --primary-foreground: hsl(210, 40%, 98%);
+  --border: hsl(214.3, 31.8%, 91.4%);
+  --background: hsl(0, 0%, 100%);
+  --ring: hsl(222.2, 84%, 4.9%);
+}
+
+/* Checkbox wrapper */
+.checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Checkbox base styles */
+.checkbox-base {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background-color: var(--background);
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+}
+
+.checkbox-base:hover {
+  border-color: var(--primary);
+}
+
+.checkbox-base:focus {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.checkbox-base.checked {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.checkbox-base.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Checkmark */
+.checkmark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 10px;
+  height: 10px;
+  color: var(--primary-foreground);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.checkbox-base.checked .checkmark {
+  opacity: 1;
+}
+
+/* Label styles */
+.checkbox-label {
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Size variants */
+.checkbox-size-sm {
+  width: 14px;
+  height: 14px;
+}
+
+.checkbox-size-sm .checkmark {
+  width: 8px;
+  height: 8px;
+}
+
+.checkbox-size-lg {
+  width: 20px;
+  height: 20px;
+}
+
+.checkbox-size-lg .checkmark {
+  width: 12px;
+  height: 12px;
+}
 </style> 
