@@ -8,7 +8,21 @@ export default {
         { name: 'change', label: 'On Change', event: { value: '' } },
     ],
     properties: {
-checked: {
+        content: {
+            label: 'Checkbox Settings',
+            type: 'Object',
+            section: 'settings',
+            bindable: true,
+            defaultValue: {
+                checked: false,
+                label: '',
+                disabled: false,
+                size: 'default',
+                customClasses: ''
+            },
+            options: {
+                item: {
+                    checked: {
                         label: 'Checked',
                         type: 'OnOff',
                         section: 'settings',
@@ -47,7 +61,9 @@ checked: {
                         section: 'style',
                         bindable: true,
                         defaultValue: ''
-    }
+                    }
+                }
+            }
         }
     }
 };
