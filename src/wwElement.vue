@@ -1,45 +1,45 @@
 <template>
-  <div :class="wrapperClasses">
-    <div 
-      :class="checkboxClasses"
-      :aria-checked="isChecked"
-      :tabindex="content.disabled ? -1 : 0"
-      role="checkbox"
-      @click="handleToggle"
-      @keydown.space.prevent="handleToggle"
-      @keydown.enter.prevent="handleToggle"
-    >
-      <svg
-        v-if="isChecked"
-        class="checkbox-check-icon"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
+  <div class="ww-checkbox">
+    <div :class="wrapperClasses">
+      <div 
+        :class="checkboxClasses"
+        :aria-checked="isChecked"
+        :tabindex="content.disabled ? -1 : 0"
+        role="checkbox"
+        @click="handleToggle"
+        @keydown.space.prevent="handleToggle"
+        @keydown.enter.prevent="handleToggle"
       >
-        <polyline points="20,6 9,17 4,12"/>
-      </svg>
+        <svg
+          v-if="isChecked"
+          class="ww-checkbox__check-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="20,6 9,17 4,12"/>
+        </svg>
+        
+        <div
+          v-else-if="content.indeterminate"
+          class="ww-checkbox__indeterminate-icon"
+        />
+      </div>
       
-      <div
-        v-else-if="content.indeterminate"
-        class="checkbox-indeterminate-icon"
-      />
+      <label 
+        v-if="content.label"
+        :class="labelClasses"
+        @click="handleToggle"
+      >
+        {{ content.label }}
+        <span v-if="content.required" class="ww-checkbox__required">*</span>
+      </label>
     </div>
-    
-    <label 
-      v-if="content.label"
-      :class="labelClasses"
-      @click="handleToggle"
-    >
-      {{ content.label }}
-      <span v-if="content.required" class="checkbox-required">*</span>
-    </label>
   </div>
 </template>
 
 <script>
-import { computed, ref } from 'vue'
-
 export default {
   name: 'ShadcnCheckbox',
   props: {
@@ -55,200 +55,228 @@ export default {
         size: "default"
       })
     },
-    wwEditorState: { type: Object, required: true }
+    wwElementState: { type: Object, required: true },
+    /* wwEditor:start */
+    wwEditorState: { type: Object, required: true },
+    /* wwEditor:end */
   },
-  emits: ['trigger-event', 'change'],
-  setup(props, { emit }) {
-    const isChecked = computed(() => {
-      return props.content.indeterminate ? false : props.content.checked
-    })
+  emits: ['trigger-event'],
+  computed: {
+    isChecked() {
+      return this.content.indeterminate ? false : this.content.checked
+    },
 
-    const wrapperClasses = computed(() => {
-      return 'checkbox-wrapper'
-    })
+    wrapperClasses() {
+      return 'ww-checkbox__wrapper'
+    },
 
-    const checkboxClasses = computed(() => {
-      const baseClass = 'checkbox-base'
-      const sizeClass = `checkbox-size-${props.content.size || 'default'}`
-      const stateClass = isChecked.value ? 'checkbox-checked' : 'checkbox-unchecked'
-      const disabledClass = props.content.disabled ? 'checkbox-disabled' : ''
-      const indeterminateClass = props.content.indeterminate ? 'checkbox-indeterminate' : ''
-      
-      return `${baseClass} ${sizeClass} ${stateClass} ${disabledClass} ${indeterminateClass}`.trim()
-    })
+    checkboxClasses() {
+      const size = this.content.size || 'default'
+      return [
+        'ww-checkbox__base',
+        `ww-checkbox__base--${size}`,
+        {
+          'ww-checkbox__base--checked': this.isChecked,
+          'ww-checkbox__base--unchecked': !this.isChecked && !this.content.indeterminate,
+          'ww-checkbox__base--disabled': this.content.disabled,
+          'ww-checkbox__base--indeterminate': this.content.indeterminate
+        }
+      ]
+    },
 
-    const labelClasses = computed(() => {
-      const baseClass = 'checkbox-label'
-      const disabledClass = props.content.disabled ? 'checkbox-label-disabled' : ''
-      return `${baseClass} ${disabledClass}`.trim()
-    })
+    labelClasses() {
+      return [
+        'ww-checkbox__label',
+        {
+          'ww-checkbox__label--disabled': this.content.disabled
+        }
+      ]
+    }
+  },
+  methods: {
+    handleToggle() {
+      if (this.content.disabled) return
 
-    const handleToggle = () => {
-      if (props.content.disabled) return
-
-      const newChecked = !props.content.checked
+      const newChecked = !this.content.checked
       
       const eventData = {
         checked: newChecked,
-        label: props.content.label,
-        content: props.content
+        label: this.content.label,
+        content: this.content
       }
 
-      emit('change', { domEvent: null, value: eventData })
-      emit('trigger-event', { 
+      this.$emit('trigger-event', { 
         domEvent: null, 
         value: eventData 
       })
-    }
-
-    return {
-      isChecked,
-      wrapperClasses,
-      checkboxClasses,
-      labelClasses,
-      handleToggle
     }
   }
 }
 </script>
 
-<style scoped>
-/* Variables CSS Shadcn/UI */
+<style>
+/* ===== SHADCN UI CSS VARIABLES ===== */
 :root {
-  --primary: hsl(222.2, 47.4%, 11.2%);
-  --primary-foreground: hsl(210, 40%, 98%);
-  --border: hsl(214.3, 31.8%, 91.4%);
-  --input: hsl(214.3, 31.8%, 91.4%);
-  --ring: hsl(222.2, 84%, 4.9%);
-  --foreground: hsl(222.2, 84%, 4.9%);
-  --destructive: hsl(0, 84.2%, 60.2%);
-  --muted-foreground: hsl(215.4, 16.3%, 46.9%);
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
 }
 
 /* Wrapper */
-.checkbox-wrapper {
+.ww-checkbox__wrapper {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 /* Checkbox Base */
-.checkbox-base {
+.ww-checkbox__base {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--border);
-  border-radius: 4px;
+  border: 2px solid hsl(var(--border));
+  border-radius: calc(var(--radius) - 2px);
   background-color: transparent;
   cursor: pointer;
   transition: all 0.2s;
   flex-shrink: 0;
 }
 
-.checkbox-base:focus-visible {
+.ww-checkbox__base:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--ring);
+  box-shadow: 0 0 0 2px hsl(var(--ring));
 }
 
 /* Sizes */
-.checkbox-size-sm {
+.ww-checkbox__base--sm {
   width: 16px;
   height: 16px;
 }
 
-.checkbox-size-default {
+.ww-checkbox__base--default {
   width: 20px;
   height: 20px;
 }
 
-.checkbox-size-lg {
+.ww-checkbox__base--lg {
   width: 24px;
   height: 24px;
 }
 
 /* States */
-.checkbox-unchecked {
-  border-color: var(--border);
+.ww-checkbox__base--unchecked {
+  border-color: hsl(var(--border));
 }
 
-.checkbox-unchecked:hover:not(.checkbox-disabled) {
-  border-color: var(--primary);
+.ww-checkbox__base--unchecked:hover:not(.ww-checkbox__base--disabled) {
+  border-color: hsl(var(--primary));
 }
 
-.checkbox-checked {
-  background-color: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-foreground);
+.ww-checkbox__base--checked {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 }
 
-.checkbox-checked:hover:not(.checkbox-disabled) {
-  background-color: hsl(222.2, 47.4%, 10%);
-  border-color: hsl(222.2, 47.4%, 10%);
+.ww-checkbox__base--checked:hover:not(.ww-checkbox__base--disabled) {
+  background-color: hsl(var(--primary) / 0.9);
+  border-color: hsl(var(--primary) / 0.9);
 }
 
-.checkbox-indeterminate {
-  background-color: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-foreground);
+.ww-checkbox__base--indeterminate {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
 }
 
-.checkbox-disabled {
+.ww-checkbox__base--disabled {
   opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
 
 /* Icons */
-.checkbox-check-icon {
+.ww-checkbox__check-icon {
   width: 12px;
   height: 12px;
 }
 
-.checkbox-size-sm .checkbox-check-icon {
+.ww-checkbox__base--sm .ww-checkbox__check-icon {
   width: 10px;
   height: 10px;
 }
 
-.checkbox-size-lg .checkbox-check-icon {
+.ww-checkbox__base--lg .ww-checkbox__check-icon {
   width: 14px;
   height: 14px;
 }
 
-.checkbox-indeterminate-icon {
+.ww-checkbox__indeterminate-icon {
   width: 8px;
   height: 2px;
   background-color: currentColor;
   border-radius: 1px;
 }
 
-.checkbox-size-sm .checkbox-indeterminate-icon {
+.ww-checkbox__base--sm .ww-checkbox__indeterminate-icon {
   width: 6px;
   height: 2px;
 }
 
-.checkbox-size-lg .checkbox-indeterminate-icon {
+.ww-checkbox__base--lg .ww-checkbox__indeterminate-icon {
   width: 10px;
   height: 2px;
 }
 
 /* Label */
-.checkbox-label {
+.ww-checkbox__label {
   font-size: 14px;
   font-weight: 400;
   line-height: 1;
-  color: var(--foreground);
+  color: hsl(var(--foreground));
   cursor: pointer;
   user-select: none;
 }
 
-.checkbox-label-disabled {
-  color: var(--muted-foreground);
+.ww-checkbox__label--disabled {
+  color: hsl(var(--muted-foreground));
   cursor: not-allowed;
 }
 
 /* Required asterisk */
-.checkbox-required {
-  color: var(--destructive);
+.ww-checkbox__required {
+  color: hsl(var(--destructive));
   margin-left: 4px;
   font-weight: 500;
 }
